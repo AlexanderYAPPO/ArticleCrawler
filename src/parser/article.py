@@ -20,8 +20,7 @@ def _parse_int(value: str) -> int:
     except ValueError:
         return -1
 
-
-def get_article(article_url) -> article.Article:
+def get_article(article_url: str) -> article.Article:
     metrics_url = build_article_metrics_link(article_url)
     session = requests_cache.CachedSession(backend="filesystem", use_cache_dir=True)
     response = session.get(metrics_url)

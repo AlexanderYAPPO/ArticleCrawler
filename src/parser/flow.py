@@ -1,15 +1,9 @@
 from src.parser import url, issue as issue_parser, article as article_parser
 
 def fetch_data_for_issue(issue_url: str):
-    links_by_section = issue_parser.get_links_by_section(issue_url)
-
-    print("Number of sections:", len(links_by_section))
-
-    for section, links in links_by_section.items():
-        print(f"Section: {section}, {len(links)}")
-        for link in links:
-            article = article_parser.get_article(link)
-            print(article.tsv())
+    issue = issue_parser.get_issue(issue_url)
+    for tsv_str in issue.tsv_list():
+        print(tsv_str)
 
 
 # def print_metrics_for_article(article_url: str):
