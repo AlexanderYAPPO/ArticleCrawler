@@ -1,13 +1,13 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Set
 
 import requests
 import requests_cache
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 
 from src.entity import issue
-from src.parser.url import get_base_url
 from src.parser import article as article_parser
+from src.parser import url as url_parser
 
 def get_issue(url: str) -> issue.Issue:
     session = requests_cache.CachedSession(backend="filesystem", use_cache_dir=True)
@@ -16,26 +16,31 @@ def get_issue(url: str) -> issue.Issue:
 
     soup = BeautifulSoup(response.text, "html.parser")
 
-    article_links = _get_links_by_section(soup, get_base_url(url))
+    title = soup.find("h1", class_="u-h2 u-mb-0 u-mr-8").get_text(strip=True)
 
+    _, _, dois = _get_cover_info(soup)
+
+    article_links = _get_links_by_section(soup, url_parser.get_base_url(url))
     issue_articles = []
     for section, links in article_links.items():
         for link in links:
             article = article_parser.get_article(link)
+            article.used_on_cover = url_parser.fetch_doi_from_article_url(article.url) in dois
             issue_articles.append((article, section))
 
-    title, description = _get_cover_title_and_description(soup)
-    print(title, description)
+    return issue.Issue(url, title, issue_articles)
 
-    return issue.Issue(url, 2021, 1, issue_articles)
-
-def _get_cover_title_and_description(soup: BeautifulSoup) -> Tuple[str, str]:
+def _get_cover_info(soup: BeautifulSoup) -> Tuple[str, str, Set[str]]:
     volume_cover_node = soup.find("div", class_="app-volumes-cover__copy")
     if volume_cover_node is None:
-        return "", ""
+        return "", "", set()
     title = volume_cover_node.find("h2").get_text(strip=True)
     description = volume_cover_node.find("p").get_text(strip=True)
-    return title, description
+
+    links = [a['href'] for a in volume_cover_node.find_all('a', href=True)]
+    dois = {url_parser.fetch_doi_from_article_url(u) for u in links}
+
+    return title, description, dois
 
 def _get_links_by_section(soup: BeautifulSoup, base_url: str) -> Dict[str, List[str]]:
     sections = {}

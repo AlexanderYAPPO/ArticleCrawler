@@ -21,6 +21,12 @@ class AlmetricScore:
     def tsv(self) -> str:
         return f"{self.get_score_readable()}\t{self.get_details_readable()}"
 
+    def dict(self):
+        return {
+            "almetric_score": self.get_score_readable(),
+            "almetric_details": self.get_details_readable()
+        }
+
 
 class CitationSummary:
     _article_accesses: _ReadableScore
@@ -48,6 +54,13 @@ class CitationSummary:
 
     def tsv(self) -> str:
         return f"{self.get_article_accesses_readable()}\t{self.get_web_of_science_readable()}\t{self.get_cross_ref_readable()}\t{self.get_almetric().tsv()}"
+
+    def dict(self):
+        d = self._almetric.dict()
+        d["article_accesses"] = self.get_article_accesses_readable()
+        d["article_web_of_science"] = self.get_web_of_science_readable()
+        d["article_cross_ref"] = self.get_cross_ref_readable()
+        return d
 
 class AlmetricScoreBuilder:
     def __init__(self):
