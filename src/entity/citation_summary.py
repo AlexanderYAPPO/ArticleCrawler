@@ -18,6 +18,9 @@ class AlmetricScore:
             return "N/A"
         return ', '.join([f"{key}: {value}" for key, value in self._details.items()])
 
+    def tsv(self) -> str:
+        return f"{self.get_score_readable()}\t{self.get_details_readable()}"
+
 
 class CitationSummary:
     _article_accesses: _ReadableScore
@@ -42,6 +45,9 @@ class CitationSummary:
 
     def get_almetric(self) -> AlmetricScore:
         return self._almetric
+
+    def tsv(self) -> str:
+        return f"{self.get_article_accesses_readable()}\t{self.get_web_of_science_readable()}\t{self.get_cross_ref_readable()}\t{self.get_almetric().tsv()}"
 
 class AlmetricScoreBuilder:
     def __init__(self):

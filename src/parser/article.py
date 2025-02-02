@@ -2,7 +2,10 @@ from typing import Dict, Tuple
 from urllib.parse import urlparse, parse_qs
 
 import requests
+import requests_cache
 from bs4 import BeautifulSoup
+
+from src.entity import article
 from src.parser.url import build_article_metrics_link
 from src.entity.citation_summary import CitationSummaryBuilder, AlmetricScoreBuilder, CitationSummary
 
@@ -18,13 +21,18 @@ def _parse_int(value: str) -> int:
         return -1
 
 
-def get_metrics(article_url) -> "CitationSummary":
+def get_article(article_url) -> article.Article:
     metrics_url = build_article_metrics_link(article_url)
-    response = requests.get(metrics_url)
-    response.raise_for_status()  # Ensure the request was successful
+    session = requests_cache.CachedSession(backend="filesystem", use_cache_dir=True)
+    response = session.get(metrics_url)
+    response.raise_for_status()
 
     soup = BeautifulSoup(response.text, "html.parser")
+    title = soup.find("h1", class_="c-article-metrics__heading u-h1").get_text(strip=True)
+    metrics = _get_metrics(soup)
+    return article.Article(url=article_url, title=title, metrics=metrics)
 
+def _get_metrics(soup: BeautifulSoup) -> "CitationSummary":
     metrics_builder = CitationSummaryBuilder()
     citations = soup.find_all("dl", class_="c-article-metrics__access-citation")
     for citation in citations:
