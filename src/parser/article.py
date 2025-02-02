@@ -1,4 +1,5 @@
 from typing import Dict, Tuple
+from urllib.parse import urlparse, parse_qs
 
 import requests
 from bs4 import BeautifulSoup
@@ -66,6 +67,11 @@ def _fetch_almetric_score(soup: BeautifulSoup) -> int:
     if donut_image is None:
         return -1
     image = donut_image.find("img")
-    if image is None or image.get("alt") is None:
+    if image is None or image.get("src") is None:
         return -1
-    return int(image.get("alt").split()[-1])
+    almetric_url = image.get("src")
+
+    parsed_url = urlparse(almetric_url)
+    query_params = parse_qs(parsed_url.query)
+    score = query_params.get("score", "?")[0]
+    return _parse_int(score)
