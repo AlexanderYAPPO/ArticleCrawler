@@ -1,9 +1,9 @@
-from src.parser.volume import get_links_by_section
+from src.parser.issue import get_links_by_section
 from src.parser.url import build_article_metrics_link
 from src.parser.article import get_metrics
 
-def fetch_data_for_volume(volume_url: str):
-    links_by_section = get_links_by_section(volume_url)
+def fetch_data_for_issue(issue_url: str):
+    links_by_section = get_links_by_section(issue_url)
 
     print("Number of sections:", len(links_by_section))
 
