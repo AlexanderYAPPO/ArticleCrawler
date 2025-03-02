@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List
 from src.entity.readable_score import _ReadableScore
 
 
@@ -26,6 +26,12 @@ class AlmetricScore:
             "almetric_score": self.get_score_readable(),
             "almetric_details": self.get_details_readable()
         }
+
+    def key_value(self) -> List:
+        return [
+            ("almetric_score", self.get_score_readable()),
+            ("almetric_details", self._details)
+        ]
 
 
 class CitationSummary:
@@ -61,6 +67,14 @@ class CitationSummary:
         d["article_web_of_science"] = self.get_web_of_science_readable()
         d["article_cross_ref"] = self.get_cross_ref_readable()
         return d
+
+    def key_value(self) -> List:
+        return [
+            ("article_accesses", self.get_article_accesses_readable()),
+            ("article_web_of_science", self.get_web_of_science_readable()),
+            ("article_cross_ref", self.get_cross_ref_readable()),
+            *self._almetric.key_value()
+        ]
 
 class AlmetricScoreBuilder:
     def __init__(self):

@@ -22,3 +22,11 @@ class Article:
         d["article_title"] = self.title
         d["article_used_on_cover"] = self.used_on_cover
         return d
+
+    def key_value(self):
+        return [
+            ("article_url", self.url),
+            ("article_title", self.title),
+            ("article_used_on_cover", self.used_on_cover),
+            *self.metrics.key_value()
+        ]

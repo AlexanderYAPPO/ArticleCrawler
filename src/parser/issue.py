@@ -24,9 +24,12 @@ def get_issue(url: str) -> issue.Issue:
     issue_articles = []
     for section, links in article_links.items():
         for link in links:
-            article = article_parser.get_article(link)
-            article.used_on_cover = url_parser.fetch_doi_from_article_url(article.url) in dois
-            issue_articles.append((article, section))
+            try:
+                article = article_parser.get_article(link)
+                article.used_on_cover = url_parser.fetch_doi_from_article_url(article.url) in dois
+                issue_articles.append((article, section))
+            except Exception as e:
+                print(f"Error parsing article {link}: {e} {e.__class__}")
 
     return issue.Issue(url, title, issue_articles)
 
@@ -34,13 +37,13 @@ def _get_cover_info(soup: BeautifulSoup) -> Tuple[str, str, Set[str]]:
     volume_cover_node = soup.find("div", class_="app-volumes-cover__copy")
     if volume_cover_node is None:
         return "", "", set()
-    title = volume_cover_node.find("h2").get_text(strip=True)
-    description = volume_cover_node.find("p").get_text(strip=True)
+    # title = volume_cover_node.find("h2").get_text(strip=True)
+    # description = volume_cover_node.find("p").get_text(strip=True)
 
     links = [a['href'] for a in volume_cover_node.find_all('a', href=True)]
     dois = {url_parser.fetch_doi_from_article_url(u) for u in links}
 
-    return title, description, dois
+    return "", "", dois
 
 def _get_links_by_section(soup: BeautifulSoup, base_url: str) -> Dict[str, List[str]]:
     sections = {}
